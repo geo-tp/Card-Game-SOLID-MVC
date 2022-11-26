@@ -5,8 +5,10 @@ import java.util.List;
 
 import com.cardgame.games.GameEvaluator;
 import com.cardgame.model.Deck;
+import com.cardgame.model.IPlayer;
 import com.cardgame.model.Player;
 import com.cardgame.model.PlayingCard;
+import com.cardgame.model.WinningPlayer;
 import com.cardgame.view.CommandLineView;
 import com.cardgame.view.GameViewable;
 
@@ -17,8 +19,8 @@ public class GameController {
 	}
 	
 	Deck deck;
-	List<Player> players;
-	Player winner;
+	List<IPlayer> players;
+	IPlayer winner;
 	GameViewable view;
 	GameEvaluator evaluator;
 	
@@ -30,7 +32,7 @@ public class GameController {
 		this.deck = deck;
 		this.view = view;
 		this.evaluator = evaluator;
-		this.players = new ArrayList<Player>();
+		this.players = new ArrayList<IPlayer>();
 		this.gameState = GameState.AddingPlayers;
 		view.setController(this);
 	}
@@ -78,12 +80,13 @@ public class GameController {
 		}
 	}
 	
+	
 	public void startGame() {
 		if (gameState != GameState.CardsDealt) {
 			deck.shuffle();
 			
 			int playerIndex = 1;
-			for (Player player : this.players) {
+			for (IPlayer player : this.players) {
 				player.addCardToHand(this.deck.getCard());
 				view.showFaceDownCardForPlayer(playerIndex++, player.getName());
 			}
@@ -95,15 +98,15 @@ public class GameController {
 	
 	public void flipCards() {
 		int playerIndex = 1;
-		for(Player player : this.players) {
+		for(IPlayer player : this.players) {
 			PlayingCard pc = player.getCard(0);
 			pc.flip();
 			view.showCardForPlayer(playerIndex++, player.getName(), pc.getRank().toString(), pc.getSuit().toString());
 		}
 		
-		this.winner = evaluator.evaluateWinner(this.players);
-		displayWinner();
-		rebuildDeck();
+		this.evaluateWinner();
+		this.displayWinner();
+		this.rebuildDeck();
 		gameState = GameState.WinnerRevealed;
 		this.run();
 	}
@@ -112,8 +115,12 @@ public class GameController {
 		view.showWinner(this.winner.getName());
 	}
 	
+	void evaluateWinner() {
+		this.winner = new WinningPlayer(evaluator.evaluateWinner(players));
+	}
+	
 	void rebuildDeck() {
-		for (Player player : this.players) {
+		for (IPlayer player : this.players) {
 			deck.returnCardToDeck(player.removeCard());
 		}
 	}

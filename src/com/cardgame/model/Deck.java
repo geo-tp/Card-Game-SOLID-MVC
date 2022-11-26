@@ -4,9 +4,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-public class Deck {
+public abstract class Deck {
 	
-	private List<PlayingCard> cards;
+	protected List<PlayingCard> cards;
 	
 	public Deck() {
 		cards = new ArrayList<PlayingCard>();
@@ -17,8 +17,8 @@ public class Deck {
 			}
 			
 			shuffle();
-		}
-;	}
+		};
+	}
 	
 	public void shuffle() {
 		Random random = new Random();
